@@ -26,10 +26,17 @@
         }(document));
     <?php endif; ?>
 
+    <?php
+
+    $redirect_url = get_option('ajax_login_register_redirect');
+    $redirect_url = empty( $redirect_url ) ? site_url($_SERVER['REQUEST_URI']) : $redirect_url;
+    $redirect_url = apply_filters( 'zm_ajax_login_redirect', $redirect_url );
+
+    ?>
     var _ajax_login_settings = {
         login_handle: "<?php print get_option('ajax_login_register_advanced_usage_login'); ?>",
         register_handle: "<?php print get_option('ajax_login_register_advanced_usage_register'); ?>",
-        redirect: "<?php $redirect_url = get_option('ajax_login_register_redirect','/'); print empty( $redirect_url ) ? '/' : $redirect_url; ?>",
+        redirect: "<?php echo $redirect_url; ?>",
         dialog_width: "<?php
 
         $width = array(

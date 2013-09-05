@@ -134,7 +134,12 @@ abstract Class AjaxLogin {
                     'key' => 'ajax_login_register_facebook',
                     'label' => __('Enable Facebook Login','ajax_login_register'),
                     'description' => __('By disabling this your Facebook settings will still be saved.','ajax_login_register')
-                )
+                ),
+                array(
+                    'key' => 'ajax_login_register_keep_me_logged_in',
+                    'label' => __('Disable keep me logged in', 'ajax_login_register'),
+                    'description' => __('Use this option to disable the check box shown to keep users logged in.','ajax_login_register')
+                    )
             );
 
         return $settings;
@@ -259,7 +264,9 @@ abstract Class AjaxLogin {
         foreach( $this->scripts as $script )
             wp_enqueue_script( $script, plugin_dir_url( dirname( __FILE__ ) ) . 'assets/' . $script . '.js', array('jquery')  );
 
-        foreach( $this->styles as $style )
-            wp_enqueue_style( $style, plugin_dir_url( dirname( __FILE__ ) ) . 'assets/' . $style . '.css' );
+        if ( ! empty( $this->styles ) ){
+            foreach( $this->styles as $style )
+                wp_enqueue_style( $style, plugin_dir_url( dirname( __FILE__ ) ) . 'assets/' . $style . '.css' );
+        }
     }
 }

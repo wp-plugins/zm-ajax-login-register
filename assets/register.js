@@ -1,14 +1,4 @@
 jQuery( document ).ready(function( $ ){
-    /**
-     * Set-up our default dialog box with the following
-     * parameters.
-     */
-    $('.ajax-login-register-container').dialog({
-        autoOpen: false,
-        width: _ajax_login_settings.dialog_width,
-        resizable: false,
-        modal: true
-    });
 
     /**
      * Close our dialog box when the user clicks

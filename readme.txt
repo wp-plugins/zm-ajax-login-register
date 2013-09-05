@@ -71,5 +71,14 @@ here: https://developers.facebook.com/apps/YOUR_APP_ID/summary
 
 
 == Changelog ==
+
+= 1.0.1 =
+
+* Added setting to disable/enable "keep me logged in" checkbox
+* Added filter `zm_ajax_login_redirect`, which allows developers to change the redirect url.
+* 3.6 Styling - z-index issue
+* 3.6 Styling - Close button no longer has default focus and default styling
+
+
 = 1.0.0 =
 * Initial release

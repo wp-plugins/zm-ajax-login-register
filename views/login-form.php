@@ -20,8 +20,12 @@
                 <?php wp_nonce_field( 'login_submit', 'security' ); ?>
                 <div class="noon"><label><?php _e('User Name','ajax_login_register'); ?></label><input type="text" name="user_login" size="30" required /></div>
                 <div class="noon"><label><?php _e('Password','ajax_login_register'); ?></label><input type="password" name="password" id="password" size="30" required /></div>
-                <input type="checkbox" name="remember" id="remember" />
-                <span class="meta"><?php _e('Keep me logged in','ajax_login_register'); ?>.</span>
+                <?php
+                $keep_logged_in = get_option('ajax_login_register_keep_me_logged_in');
+                if ( $keep_logged_in != "on") : ?>
+                    <input type="checkbox" name="remember" id="remember" />
+                    <span class="meta"><?php _e('Keep me logged in','ajax_login_register'); ?>.</span>
+                <?php endif; ?>
                 <a href="<?php echo wp_lostpassword_url(); ?>" title="Lost Password"><?php _e('Lost Password','ajax_login_register'); ?></a>
                 <div class="button-container">
                     <input id="login_button" class="green" type="submit" value="Login" accesskey="p" name="submit" />

@@ -34,6 +34,7 @@ jQuery( document ).ready(function( $ ){
             dataType: 'json',
             success: function( msg ){
                 ajax_login_register_show_message( msg );
+console.log( msg );
             }
         });
     }
@@ -43,6 +44,7 @@ jQuery( document ).ready(function( $ ){
      * Validate email
      */
     $( document ).on('blur', '.ajax-login-register-validate-email', function(){
+        console.log( $(this) );
         ajax_login_register_validate_email( $(this) );
     });
 
@@ -60,6 +62,22 @@ jQuery( document ).ready(function( $ ){
                 ajax_login_register_show_message( msg );
             }
         });
+    });
+
+    /**
+     * Set-up our default dialog box with the following
+     * parameters.
+     */
+    $('.ajax-login-register-container').dialog({
+        autoOpen: false,
+        width: _ajax_login_settings.dialog_width,
+        resizable: false,
+        modal: true,
+        open: function(){
+            $('.ui-widget-overlay').bind('click',function(){
+                $('.ajax-login-register-container').dialog('close');
+            });
+        }
     });
 
 });

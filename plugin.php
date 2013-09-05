@@ -4,7 +4,7 @@
  * Plugin Name: zM Ajax Login & Register
  * Plugin URI: --
  * Description: Creates a simple login and register modal with an optional shortcode.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Zane Matthew
  * Author URI: http://zanematthew.com/
  * License: GPL V2 or Later
@@ -33,6 +33,6 @@ require_once 'controllers/register.php';
 
 
 /**
- * Load the login class only if users are not logged in.
+ * Load the login class
  */
 require_once 'controllers/login.php';
