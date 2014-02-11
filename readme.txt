@@ -9,7 +9,7 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-zM Ajax Login & Register allows you to create a custom login and registration page or login and registration modals. Complete with AJAX verification and Facebook login support.
+This plugin allows you to create a custom login and registration page or modals. Complete with AJAX verification and Facebook support.
 
 == Description ==
 
