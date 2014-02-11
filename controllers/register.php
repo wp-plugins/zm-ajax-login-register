@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This is file is repsonible for custom logic needed by all templates. NO
+ * This is file is responsible for custom logic needed by all templates. NO
  * admin code should be placed in this file.
  */
 Class Register Extends AjaxLogin {
@@ -95,6 +95,10 @@ Class Register Extends AjaxLogin {
                 update_user_meta( $user_id, 'show_admin_bar_front', 'false' );
                 update_user_meta( $user_id, 'fb_id', $user['fb_id'] );
 
+                if ( is_multisite() ){
+                    $this->multisite_setup( $user_id );
+                }
+
                 wp_update_user( array( 'ID' => $user_id, 'role' => 'subscriber' ) );
                 $wp_signon = wp_signon( array( 'user_login' => $user['login'], 'user_password' => $user['password'], 'remember' => true ), false );
                 $msg = $this->status[0]; // success
@@ -116,7 +120,38 @@ Class Register Extends AjaxLogin {
      * Load the login shortcode
      */
     public function register_shortcode(){
+        ob_start();
         load_template( plugin_dir_path( dirname( __FILE__ ) ) . 'views/register-form.php' );
+        echo ob_get_clean();
+    }
+
+
+    public function multisite_setup( $user_id=null ){
+        return add_user_to_blog( get_current_blog_id(), $user_id, 'subscriber');
+    }
+
+
+    // Create Facebook User
+    //
+    public function create_facebook_user( $user=array() ){
+        // Generate password: wp_generate_password
+        $random_password = wp_generate_password();
+
+        // Create user with random password
+        $user_id = wp_create_user( $user['username'], $random_password, $user['email'] );
+
+        if ( ! is_wp_error( $user_id ) ){
+
+            // Store random password as user meta
+            $meta_id = add_user_meta( $user_id, '_random', $random_password );
+
+            // Setup this user if this is Multisite/Networking
+            if ( is_multisite() ){
+                $this->multisite_setup( $user_id );
+            }
+        }
+
+        return get_user_by( 'id', $user_id );
     }
 }
 new Register;

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This is file is repsonible for custom logic needed by all templates. NO
+ * This is file is responsible for custom logic needed by all templates. NO
  * admin code should be placed in this file.
  */
 Class Login Extends AjaxLogin {
@@ -66,6 +66,8 @@ Class Login Extends AjaxLogin {
      * @param $password (string)
      * @param $is_ajax (bool) Process as an AJAX request
      * @package AJAX
+     *
+     * @return userlogin on success; 0 on false;
      */
     public function login_submit( $user_login=null, $password=null, $is_ajax=true ) {
 
@@ -91,9 +93,13 @@ Class Login Extends AjaxLogin {
          * If signon is successful we print the user name if not we print "0" for
          * false
          */
-        print is_wp_error( $user ) ? "0" : $user->data->user_login;
+        $status = is_wp_error( $user ) ? $this->status[1] : $this->status[0];
 
-        if ( $is_ajax ) die(); else return false;
+        if ( $is_ajax ) {
+            wp_send_json( $status );
+        } else {
+            return $status;
+        }
     }
 
 
@@ -106,40 +112,41 @@ Class Login Extends AjaxLogin {
 
         check_ajax_referer('login_submit','security');
 
-        $username = $_POST['username'];
-        $password = $_POST['fb_id'];
-        $email = $_POST['email'];
-        $fb_id = $_POST['fb_id'];
+        $user = array(
+            'username' => $_POST['username'],
+            'email' => $_POST['email'],
+            'fb_id' => $_POST['fb_id']
+            );
 
-        if ( empty( $username ) || empty( $password ) ){
+        if ( empty( $user['username'] ) ){
+
             $msg = $this->status[3];
+
         } else {
-            /**
-             * @todo secure password/fb_id
-             */
-            $logged_in = $this->login_submit( $username, $password, false );
 
-            if ( $logged_in ) {
-                $msg = $this->status[1];
-            } else {
-                $msg = $this->register_submit( $username, $password, $email, $is_ajax=false );
+            // Get our user object, if this user does not exists we create it
+            $user_obj = get_user_by( 'email', $user['email'] );
 
-                do_action( 'ajax_login_register_after_facebook_login', $username );
 
-                /**
-                 * @todo were updating the taxonomy meta with the fb id, this is bad
-                 */
-                // Move this to the attendee plugin as an hook for "ajax_login_register_after_facebook_login"
-                // $attendee_id = zm_login_register_create_attendee( $username );
-                // update_term_meta( $attendee_id, 'fb_id', $fb_id );
-                // if ( $attendee_id ) {
-                //     $rr = update_user_meta( $user_id, 'attendee_id', $attendee_id  );
-                // }
+            if ( $user_obj == false ){
+                $register_obj = New Register;
+                $user_obj = $register_obj->create_facebook_user( $user );
             }
+            //
+
+            // Log our FB user in
+            $password = get_usermeta( $user_obj->ID, '_random' );
+            $logged_in = $this->login_submit( $user_obj->user_login, $password, false );
+
+            if ( $logged_in == true ){
+                $msg = $this->status[0];
+            } else {
+                die("\nSomething to do here");
+            }
+
         }
 
-        print json_encode( $msg );
-        die();
+        wp_send_json( $msg );
     }
 
 
@@ -147,7 +154,10 @@ Class Login Extends AjaxLogin {
      * Load the login shortcode
      */
     public function login_shortcode(){
+        ob_start();
         load_template( plugin_dir_path( dirname( __FILE__ ) ) . 'views/login-form.php' );
+        echo ob_get_clean();
     }
+
 }
 new Login;

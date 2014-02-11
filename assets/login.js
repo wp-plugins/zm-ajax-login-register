@@ -32,13 +32,13 @@ jQuery( document ).ready(function( $ ){
          */
         FB.login( function( response ) {
             /**
-             * If we get a succesful authorization response we handle it
+             * If we get a successful authorization response we handle it
              * note the "scope" parameter.
              */
             if ( response.authResponse ) {
 
                 /**
-                 * "me" referes to the current FB user, console.log( response )
+                 * "me" refers to the current FB user, console.log( response )
                  * for a full list.
                  */
                 FB.api('/me', function(response) {
@@ -68,12 +68,13 @@ jQuery( document ).ready(function( $ ){
                         },
                         global: false,
                         success: function( msg ){
+                            $('.fb-login-container').append( msg.description );
                             window.location.replace( _ajax_login_settings.redirect );
                         }
                     });
                 });
             } else {
-                console.log('User cancelled login or did not fully authorize.');
+                console.log('User canceled login or did not fully authorize.');
             }
         },{
             /**
@@ -89,19 +90,18 @@ jQuery( document ).ready(function( $ ){
      */
     if ( _ajax_login_settings.login_handle.length ){
         $( document ).on('click', _ajax_login_settings.login_handle, function( event ){
+
             event.preventDefault();
 
             $('#ajax-login-register-login-dialog').dialog('open');
 
-            var data = {
-                action: 'load_template',
-                referer: 'login_form',
-                template: 'login-form',
-                security: $('#ajax-login-register-login-dialog').attr('data-security')
-            };
-
             $.ajax({
-                data: data,
+                data: {
+                    action: 'load_template',
+                    referer: 'login_form',
+                    template: 'login-form',
+                    security: $('#ajax-login-register-login-dialog').attr('data-security')
+                },
                 success: function( msg ){
                     $( "#ajax-login-register-login-target" ).fadeIn().html( msg ); // Give a smooth fade in effect
                 }
