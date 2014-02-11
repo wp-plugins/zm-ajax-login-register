@@ -34,14 +34,14 @@ If you've enabled the Facebook login or register, from your settings, the Facebo
 
 = Usage =
 
-**Note your site will need to be open to registration**
+*Note your site will need to be open to registration*
 
 1. Create a page
 1. Add the following shortcode `[ajax_login]` or `[ajax_register]`
 
 Advanced usage allows you to use any menu item to launch the login and register modal boxes.
 
-**Note your page must support custom menus**
+*Note your page must support custom menus*
 
 1. Create a menu item; such as "login" you can set the URL to # if need be
 1. Assign a unique class name to the menu item. If you do not see the "class name section", click on the "Screen options" in the upper corner and check the box for "CSS Classes"
