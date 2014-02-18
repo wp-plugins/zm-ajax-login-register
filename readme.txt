@@ -9,7 +9,7 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-This plugin allows you to create a custom login and registration page or modals. Complete with AJAX verification and Facebook support.
+Allows you to create a custom login and registration page or login and registration modals. Complete with AJAX verification and Facebook login support.
 
 == Description ==
 
@@ -34,14 +34,14 @@ If you've enabled the Facebook login or register, from your settings, the Facebo
 
 = Usage =
 
-*Note your site will need to be open to registration*
+**Note your site will need to be open to registration**
 
 1. Create a page
 1. Add the following shortcode `[ajax_login]` or `[ajax_register]`
 
 Advanced usage allows you to use any menu item to launch the login and register modal boxes.
 
-*Note your page must support custom menus*
+**Note your page must support custom menus**
 
 1. Create a menu item; such as "login" you can set the URL to # if need be
 1. Assign a unique class name to the menu item. If you do not see the "class name section", click on the "Screen options" in the upper corner and check the box for "CSS Classes"
@@ -50,6 +50,8 @@ Advanced usage allows you to use any menu item to launch the login and register 
 1. Visit the settings page from the WordPress Admin (Settings --> Ajax Login & Register)
 1. Paste the CSS class name in the appropriate field, either "Login Handle" or "Register Handle"
 1. Save the settings
+
+**Additionally you can assign a URL to a page the user is redirected to once logged in. The default is the site home page**
 
 == Installation ==
 
@@ -74,13 +76,6 @@ Ensure that you have the setting "Enable Facebook Login" checked.
 Please check your settings in WordPress Admin -> Settings -> AJax Login & Register with the settings found
 here: https://developers.facebook.com/apps/YOUR_APP_ID/summary
 
-= What is my Facebook "Admin ID"? =
-
-You can find this by visiting the [Facebook API Graph Explorer](https://developers.facebook.com/tools/explorer/?method=GET&path=15204576%3Ffields%3Did).
-
-= How do I use the login or register modal? =
-
-Please visit the following [video tutorial](http://www.youtube.com/watch?v=Zl2kUIOwnOQ)
 
 == Screenshots ==
 
@@ -95,7 +90,16 @@ Please visit the following [video tutorial](http://www.youtube.com/watch?v=Zl2kU
 
 * Check settings
 
+
 == Changelog ==
+
+= 1.0.3 =
+
+* When Login modal is used the Login link changes text to say "Logout" once the user is logged in, [#9](https://github.com/zanematthew/zm-ajax-login-register/issues/9)
+* Removing duplicate IDs [#14](https://github.com/zanematthew/zm-ajax-login-register/issues/14)
+* Localizing JS, [https://github.com/zanematthew/zm-ajax-login-register/issues/13](#13)
+* Fixing issue where users could not register when the modal and shortcode was in use at the same time, [#11](https://github.com/zanematthew/zm-ajax-login-register/issues/11)
+* Bug: Fixed issue where Facebook login did not work on the registration page, [#12](https://github.com/zanematthew/zm-ajax-login-register/issues/12)
 
 = 1.0.2 =
 
@@ -105,12 +109,14 @@ Please visit the following [video tutorial](http://www.youtube.com/watch?v=Zl2kU
 * Bug: Shortcode now returns HTML rather than printing it
 * Security: Enhanced security for credentials when creating Facebook users
 
+
 = 1.0.1 =
 
-* Added setting to enable/disable "keep me logged in" checkbox
+* Added setting to disable/enable "keep me logged in" checkbox
 * Added filter `zm_ajax_login_redirect`, which allows developers to change the redirect url.
 * 3.6 Styling - z-index issue
 * 3.6 Styling - Close button no longer has default focus and default styling
+
 
 = 1.0.0 =
 

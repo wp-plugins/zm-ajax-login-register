@@ -5,19 +5,18 @@ jQuery( document ).ready(function( $ ){
      */
     $.ajaxSetup({
         type: "POST",
-        url: ajaxurl
+        url: _ajax_login_settings.ajaxurl
     });
 
-    window.ajax_login_register_show_message = function( msg ) {
-
+    window.ajax_login_register_show_message = function( form_obj, msg ) {
         if ( msg == null ) {
             jQuery('.ajax-login-register-msg-target').fadeOut('fast');
         }
 
         if ( ! msg ) return;
 
-        jQuery('.ajax-login-register-msg-target').toggleClass( msg.cssClass );
-        jQuery('.ajax-login-register-msg-target').fadeIn().html( msg.description );
+        jQuery('.ajax-login-register-msg-target', form_obj).toggleClass( msg.cssClass );
+        jQuery('.ajax-login-register-msg-target', form_obj).fadeIn().html( msg.description );
     };
 
 
@@ -29,12 +28,13 @@ jQuery( document ).ready(function( $ ){
 
         if ( $.trim( $this.val() ) == '' ) return;
 
+        $form = $this.parents('form');
+
         $.ajax({
             data: "action=validate_email&email=" + $this.val(),
             dataType: 'json',
             success: function( msg ){
-                ajax_login_register_show_message( msg );
-console.log( msg );
+                ajax_login_register_show_message( $form, msg );
             }
         });
     }
@@ -44,7 +44,6 @@ console.log( msg );
      * Validate email
      */
     $( document ).on('blur', '.ajax-login-register-validate-email', function(){
-        console.log( $(this) );
         ajax_login_register_validate_email( $(this) );
     });
 
@@ -52,14 +51,17 @@ console.log( msg );
     /**
      * Check that username is valid
      */
-    $( document ).on('blur', '#user_login', function(){
+    $( document ).on('blur', '.user_login', function(){
+
         if ( $.trim( $(this).val() ) == '' ) return;
+
+        $form = $(this).parents('form');
 
         $.ajax({
             data: "action=validate_username&login=" + $( this ).val(),
             dataType: 'json',
             success: function( msg ){
-                ajax_login_register_show_message( msg );
+                ajax_login_register_show_message( $form, msg );
             }
         });
     });
