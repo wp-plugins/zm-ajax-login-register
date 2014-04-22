@@ -9,13 +9,13 @@ Class Login Extends AjaxLogin {
     /**
      * Array of JavaScript, note name, must match FILE name!
      */
-    public $scripts = array( 'login' );
+    public $scripts = array( array( 'handle' => 'zm-login-js', 'file' => 'login.js' ) );
 
 
     /**
      * Array of stylesheets, note name, must match FILE name!
      */
-    public $styles = array( 'login' );
+    public $styles = array( array( 'handle' => 'zm-login-css', 'file' => 'login.css' ) );
 
 
     /**
@@ -156,7 +156,7 @@ Class Login Extends AjaxLogin {
     public function login_shortcode(){
         ob_start();
         load_template( plugin_dir_path( dirname( __FILE__ ) ) . 'views/login-form.php' );
-        echo ob_get_clean();
+        return ob_get_clean();
     }
 
 }
