@@ -161,7 +161,7 @@ abstract Class AjaxLogin {
                 break;
 
             case 'text':
-                $field = '<input type="text" name="' . $key . '" id="' . $key . '" class="regular-text" value="' . get_option( $key ) . '" />';
+                $field = '<input type="text" name="' . $key . '" id="' . $key . '" class="regular-text" value="' . esc_attr( get_option( $key ) ) . '" />';
                 break;
 
             case 'select':
@@ -246,13 +246,6 @@ abstract Class AjaxLogin {
 
         $dependencies = array(
             'jquery',
-            'jquery-ui-core',
-            'jquery-ui-widget',
-            'jquery-ui-mouse',
-            'jquery-ui-position',
-            'jquery-ui-draggable',
-            'jquery-ui-resizable',
-            'jquery-ui-button',
             'jquery-ui-dialog'
         );
 

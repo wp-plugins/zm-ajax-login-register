@@ -19,7 +19,7 @@ Class Admin Extends AjaxLogin {
 
 
     /**
-     * Retrive our settings from our parent class and register each setting.
+     * Retrieve our settings from our parent class and register each setting.
      * @todo use add_settings_section()
      */
     public function register_settings(){
@@ -35,7 +35,7 @@ Class Admin Extends AjaxLogin {
 
 
     /**
-     * This method is fired when the settings that are rgister with register_settings()
+     * This method is fired when the settings that are register with register_settings()
      * are saved from the settings page. We filter out ALL html/js using wp_kses().
      */
     public function sanitize( $setting ){

@@ -78,6 +78,7 @@ jQuery( document ).ready(function( $ ){
         autoOpen: false,
         width: _ajax_login_settings.dialog_width,
         resizable: false,
+        draggable: false,
         modal: true,
         open: function(){
             $('.ui-widget-overlay').bind('click',function(){
@@ -85,5 +86,15 @@ jQuery( document ).ready(function( $ ){
             });
         }
     });
+
+
+    /**
+     * When the user scrolls close the dialog box
+     */
+    if ( $('.ajax-login-register-container').length ) {
+        $( window ).on('scroll',function(){
+            $('.ajax-login-register-container').dialog('close');
+        });
+    }
 
 });
