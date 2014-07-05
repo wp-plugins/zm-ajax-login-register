@@ -8,44 +8,12 @@
  */
 abstract Class AjaxLogin {
 
-    /**
-     * Validation status responses
-     */
-    public $status = array(
-        array(
-            'status' => 0,
-            'cssClass' => 'success',
-            'msg' => 'Pass',
-            'field' => '',
-            'description' => '<div class="success-container">Success! One moment while we log you in...</div>'
-            ),
-        array(
-            'status' => 1,
-            'cssClass' => 'error',
-            'msg' => 'Default Error',
-            'description' => '<div class="error-container">Error</div>'
-            ),
-        array(
-            'status' => 2,
-            'cssClass' => 'error',
-            'msg' => 'Invalid User',
-            'description' => '<div class="error-container">Login is in use or invalid</div>'
-            ),
-        array(
-            'status' => 3,
-            'msg' => 'Fail',
-            'cssClass' => 'error',
-            'description' => '<div class="error-container">Email in use or invalid</div>'
-            )
-        );
-
     public $scripts = array();
 
     /**
      * WordPress hooks to be ran during init
      */
     public function __construct(){
-        add_action( 'wp_enqueue_scripts', array( &$this, 'enqueue_scripts' ) );
 
         add_action( 'wp_head', array( &$this, 'header' ) );
 
@@ -114,17 +82,14 @@ abstract Class AjaxLogin {
                 array(
                     'key' => 'url',
                     'label' => __('URL','ajax_login_register'),
-                    'type' => 'text'
-                    ),
-                array(
-                    'key' => 'admins',
-                    'label' => __('Admin ID','ajax_login_register'),
-                    'type' => 'text'
+                    'type' => 'text',
+                    'description' => __('This is the URL you have set in your Facebook Developer App Settings','ajax_login_register')
                     ),
                 array(
                     'key' => 'app_id',
                     'label' => __('App ID','ajax_login_register'),
-                    'type' => 'text'
+                    'type' => 'text',
+                    'description' => __('This is the App ID as seen in your Facebook Developer App Dashboard','ajax_login_register')
                     )
             );
 
@@ -132,11 +97,11 @@ abstract Class AjaxLogin {
                 array(
                     'key' => 'ajax_login_register_facebook',
                     'label' => __('Enable Facebook Login','ajax_login_register'),
-                    'description' => __('By disabling this your Facebook settings will still be saved.','ajax_login_register')
+                    'description' => __('By disabling this, your Facebook settings will still be saved.','ajax_login_register')
                 ),
                 array(
                     'key' => 'ajax_login_register_keep_me_logged_in',
-                    'label' => __('Disable keep me logged in', 'ajax_login_register'),
+                    'label' => __('Disable "keep me logged in"', 'ajax_login_register'),
                     'description' => __('Use this option to disable the check box shown to keep users logged in.','ajax_login_register')
                     )
             );
@@ -184,10 +149,12 @@ abstract Class AjaxLogin {
 
         $email = is_null( $email ) ? $email : $_POST['email'];
 
-        if ( filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
-            $msg = email_exists( $email ) ? $this->status[3] : null;
+        if ( ! filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
+            $msg = $this->status('email_invalid');
+        } else if ( email_exists( $email ) ){
+            $msg = $this->status('email_in_use');
         } else {
-            $msg = $this->status[3];
+            $msg = $this->status('email_valid');
         }
 
         if ( $is_ajax ){
@@ -208,17 +175,21 @@ abstract Class AjaxLogin {
      */
     public function validate_username( $username=null, $is_ajax=true ) {
 
-        $username = empty( $_POST['login'] ) ? $username : $_POST['login'];
+        $username = empty( $_POST['login'] ) ? esc_attr( $username ) : $_POST['login'];
 
-        if ( validate_username( $username ) && ! is_object( get_user_by( 'login', $username ) ) ) {
-            $msg = null;
+        if ( validate_username( $username ) ) {
+            $user_id = username_exists( $username );
+            if ( $user_id ){
+                $msg = $this->status('username_exists');
+            } else {
+                $msg = $this->status('valid_username');
+            }
         } else {
-            $msg =$this->status[2];
+            $msg = $this->status('invalid_username');
         }
 
         if ( $is_ajax ){
-            print json_encode( $msg );
-            die();
+            wp_send_json( $msg );
         } else {
             return $msg;
         }
@@ -238,61 +209,78 @@ abstract Class AjaxLogin {
 
 
     /**
-     * Loads our default CSS and JS along with controller specific CSS and JS
+     * Validation status responses
      */
-    public function enqueue_scripts( $scripts=null ){
+    public function status( $key=null, $value=null ){
 
-        if ( empty( $this->scripts ) ) return;
+        $status = array(
 
-        $dependencies = array(
-            'jquery',
-            'jquery-ui-dialog'
-        );
+            'valid_username' => array(
+                'description' => null,
+                'cssClass' => 'noon',
+                'code' => 'success'
+                ),
+            'username_exists' => array(
+                'description' => __('Invalid username', 'ajax_login_register'),
+                'cssClass' => 'error-container',
+                'code' => 'error'
+                ),
+            'invalid_username' => array(
+                'description' => __( 'Invalid username', 'ajax_login_register' ),
+                'cssClass' => 'error-container',
+                'code' => 'error'
+                ),
+            'username_does_not_exists' => array(
+                'description' => __( 'Invalid username', 'ajax_login_register' ),
+                'cssClass' => 'error-container',
+                'code' => 'error'
+                ),
 
-        wp_enqueue_style( 'ajax-login-style', plugin_dir_url( dirname( __FILE__ ) ) . "assets/style.css" );
-        wp_enqueue_style( 'jquery-ui-custom', plugin_dir_url( dirname( __FILE__ ) ) . "assets/jquery-ui.css" );
-        wp_enqueue_script( 'ajax-login-script', plugin_dir_url( dirname( __FILE__ ) ) . 'assets/scripts.js', $dependencies  );
+            'incorrect_password' => array(
+                'description' => 'Invalid',
+                'cssClass' => 'error-container',
+                'code' => 'error'
+                ),
+            'passwords_do_not_match' => array(
+                'description' => __('Passwords do not match.','ajax_login_register'),
+                'cssClass' =>'error-container',
+                'code' => 'error'
+                ),
 
-        $redirect_url = get_option('ajax_login_register_redirect');
-        $redirect_url = empty( $redirect_url ) ? site_url($_SERVER['REQUEST_URI']) : $redirect_url;
-        $redirect_url = apply_filters( 'zm_ajax_login_redirect', $redirect_url );
-        $width = array(
-            'default' => 265,
-            'wide' => 440,
-            'extra_buttons' => 666
+            'email_valid' => array(
+                'description' => null,
+                'cssClass' => 'noon',
+                'code' => 'success'
+                ),
+            'email_invalid' => array(
+                'description' => __( 'Invalid Email', 'ajax_login_register' ),
+                'cssClass' => 'error-container',
+                'code' => 'error'
+                ),
+            'email_in_use' => array(
+                'description' => __( 'Invalid Email', 'ajax_login_register' ),
+                'cssClass' => 'error-container',
+                'code' => 'error'
+                ),
+
+            'success_login' => array(
+                'description' => __( 'Success! One moment while we log you in...', 'ajax_login_register' ),
+                'cssClass' => 'success-container',
+                'code' => 'success_login'
+                ),
+            'success_registration' => array(
+                'description' => __( 'Success! One moment while we log you in...', 'ajax_login_register' ),
+                'cssClass' => 'noon',
+                'code' => 'success_registration'
+                )
             );
 
-        $style = get_option('ajax_login_register_default_style');
-        $fb_button = get_option('ajax_login_register_facebook');
+        $status = apply_filters( 'ajax_login_register_status_codes', $status );
 
-        if ( $style == 'wide' && $fb_button ){
-            $key = 'extra_buttons';
-        } elseif ( $style == 'wide' ){
-            $key = 'wide';
+        if ( empty( $value ) ){
+            return $status[ $key ];
         } else {
-            $key = 'default';
-        }
-
-        wp_localize_script( 'ajax-login-script', '_ajax_login_settings', array(
-            'ajaxurl' => admin_url("admin-ajax.php"),
-            'login_handle' => get_option('ajax_login_register_advanced_usage_login'),
-            'register_handle' => get_option('ajax_login_register_advanced_usage_register'),
-            'redirect' => $redirect_url,
-            'dialog_width' => $width[ $key ],
-            'match_error' => __('Passwords do not match.','ajax_login_register'),
-            'is_user_logged_in' => is_user_logged_in() ? 1 : 0,
-            'wp_logout_url' => wp_logout_url( site_url() ),
-            'logout_text' => __('Logout', 'ajax_login_register' )
-            ) );
-
-
-
-        foreach( $this->scripts as $script )
-            wp_enqueue_script( $script['handle'], plugin_dir_url( dirname( __FILE__ ) ) . 'assets/' . $script['file'], array('jquery')  );
-
-        if ( ! empty( $this->styles ) ){
-            foreach( $this->styles as $style )
-                wp_enqueue_style( $style['handle'], plugin_dir_url( dirname( __FILE__ ) ) . 'assets/' . $style['file'] );
+            return $status[ $key ][ $value ];
         }
     }
 }

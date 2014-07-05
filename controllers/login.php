@@ -6,17 +6,6 @@
  */
 Class Login Extends AjaxLogin {
 
-    /**
-     * Array of JavaScript, note name, must match FILE name!
-     */
-    public $scripts = array( array( 'handle' => 'zm-login-js', 'file' => 'login.js' ) );
-
-
-    /**
-     * Array of stylesheets, note name, must match FILE name!
-     */
-    public $styles = array( array( 'handle' => 'zm-login-css', 'file' => 'login.css' ) );
-
 
     /**
      * Run the following methods when this class is loaded
@@ -74,26 +63,29 @@ Class Login Extends AjaxLogin {
         /**
          * Verify the AJAX request
          */
-        if ( $is_ajax ) check_ajax_referer('login_submit','security');
-
-
-        /**
-         * Build our array of credentials to be passed into wp_signon.
-         * Default is to look for $_POST variables
-         */
-        $creds = array(
-            'user_login'    => empty( $_POST['user_login'] ) ? $user_login : sanitize_text_field( $_POST['user_login'] ),
-            'user_password' => empty( $_POST['password'] ) ? $password : sanitize_text_field( $_POST['password'] ),
-            'remember'      => isset( $_POST['rememberme'] ) ? null : true
-            );
-        $user = wp_signon( $creds, false );
-
-
-        /**
-         * If signon is successful we print the user name if not we print "0" for
-         * false
-         */
-        $status = is_wp_error( $user ) ? $this->status[1] : $this->status[0];
+        if ( $is_ajax ) check_ajax_referer('login_submit','security');       
+        
+        $username = empty( $_POST['user_login'] ) ? $user_login : sanitize_text_field( $_POST['user_login'] );
+        $password = empty( $_POST['password'] ) ? $password : sanitize_text_field( $_POST['password'] );
+        $remember = empty( $_POST['password'] ) ? $password : sanitize_text_field( $_POST['password'] );
+        
+        // Currently wp_signon returns the same error code 'invalid_username' if
+        // a username does not exists or is invalid
+        if ( validate_username( $username ) ){
+            if ( username_exists( $username ) ){
+                $creds = array(
+                    'user_login'    => $username,
+                    'user_password' => $password,
+                    'remember'      => $remember
+                    );
+                $user = wp_signon( $creds, false );
+                $status = is_wp_error( $user ) ? $this->status( $user->get_error_code() ) : $this->status('success_login');
+            } else {
+                $status = $this->status('username_does_not_exists');
+            }
+        } else {
+            $status = $this->status('invalid_username');
+        }
 
         if ( $is_ajax ) {
             wp_send_json( $status );
@@ -111,39 +103,42 @@ Class Login Extends AjaxLogin {
     public function facebook_login(){
 
         check_ajax_referer( 'facebook-nonce', 'security' );
-
+        
+        // Map our FB response fields to the correct user fields as found in wp_update_user
         $user = array(
-            'username' => $_POST['username'],
-            'email' => $_POST['email'],
-            'fb_id' => $_POST['fb_id']
+            'username'   => $_POST['fb_response']['id'],
+            'user_login' => $_POST['fb_response']['id'],
+            'first_name' => $_POST['fb_response']['first_name'],
+            'last_name'  => $_POST['fb_response']['last_name'],
+            'user_email' => $_POST['fb_response']['email'],
+            'user_url'   => $_POST['fb_response']['link'],
             );
 
         if ( empty( $user['username'] ) ){
 
-            $msg = $this->status[3];
+            $msg = $this->status('invalid_username');
 
         } else {
-
-            // Get our user object, if this user does not exists we create it
-            $user_obj = get_user_by( 'email', $user['email'] );
-
+            
+            // If older version use this
+            // $user_obj = get_user_by( 'email', $user['email'] );
+            
+            $user_obj = get_user_by( 'login', $user['user_login'] );
 
             if ( $user_obj == false ){
                 $register_obj = New Register;
                 $user_obj = $register_obj->create_facebook_user( $user );
-            }
-            //
-
+            }            
+	
             // Log our FB user in
             $password = get_usermeta( $user_obj->ID, '_random' );
             $logged_in = $this->login_submit( $user_obj->user_login, $password, false );
 
             if ( $logged_in == true ){
-                $msg = $this->status[0];
+                $msg = $this->status('success_login');
             } else {
                 die("\nSomething to do here");
             }
-
         }
 
         wp_send_json( $msg );

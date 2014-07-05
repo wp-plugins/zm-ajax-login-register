@@ -7,18 +7,6 @@
 Class Register Extends AjaxLogin {
 
     /**
-     * Array of scripts, note name, must match FILE name!
-     */
-    public $scripts = array( array( 'handle' => 'zm-register-css', 'file' => 'register.js' ) );
-
-
-    /**
-     * Array of stylesheets, note name, must match FILE name!
-     */
-    public $styles = array( array( 'handle' => 'zm-register-css', 'file' => 'register.css' ) );
-
-
-    /**
      * Run the following methods when this class is loaded
      */
     public function __construct(){
@@ -81,11 +69,10 @@ Class Register Extends AjaxLogin {
         $valid['username'] = $this->validate_username( $user['login'], false );
         $user_id = null;
 
-        if ( $valid['email']['status'] == 1 // default error
-            || $valid['username']['status'] == 2 // invalid user
-            || $valid['username']['status'] == 3 // invalid email
-            ) {
-            $msg = $this->status[2]; // invalid user
+        if ( $valid['username']['code'] == 'error' ){
+            $msg = $this->status('invalid_username'); // invalid user
+        } else if ( $valid['email']['code'] == 'error' ) {
+            $msg = $this->status('invalid_username'); // invalid user
         } else {
 
             $user_id = wp_create_user( $user['login'], $user['password'], $user['email'] );
@@ -103,15 +90,14 @@ Class Register Extends AjaxLogin {
 
                 wp_update_user( array( 'ID' => $user_id, 'role' => 'subscriber' ) );
                 $wp_signon = wp_signon( array( 'user_login' => $user['login'], 'user_password' => $user['password'], 'remember' => true ), false );
-                $msg = $this->status[0]; // success
+                $msg = $this->status('success_registration'); // success
             } else {
-                $msg = $this->status[2]; // invalid user
+                $msg = $this->status('invalid_username'); // invalid user
             }
         }
 
         if ( $is_ajax ) {
-            print json_encode( $msg );
-            die();
+            wp_send_json( $msg );
         } else {
             return $msg;
         }
@@ -136,17 +122,19 @@ Class Register Extends AjaxLogin {
     // Create Facebook User
     //
     public function create_facebook_user( $user=array() ){
-        // Generate password: wp_generate_password
-        $random_password = wp_generate_password();
 
-        // Create user with random password
-        $user_id = wp_create_user( $user['username'], $random_password, $user['email'] );
+        $user['user_pass'] = wp_generate_password();
+        $user['user_registered'] = date('Y-m-d H:i:s');
+        $user['role'] = "subscriber";
 
-        if ( ! is_wp_error( $user_id ) ){
+        $user_id = wp_insert_user( $user );
 
+        if ( is_wp_error( $user_id ) ){
+            return $user_id;
+        } else {
             // Store random password as user meta
-            $meta_id = add_user_meta( $user_id, '_random', $random_password );
-
+            $meta_id = add_user_meta( $user_id, '_random', $user['user_pass'] );
+            
             // Setup this user if this is Multisite/Networking
             if ( is_multisite() ){
                 $this->multisite_setup( $user_id );

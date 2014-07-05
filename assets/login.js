@@ -1,4 +1,25 @@
 jQuery( document ).ready(function( $ ){
+
+    window.zMAjaxLoginDialog = {
+        open: function(){
+            $('#ajax-login-register-login-dialog').dialog('open');
+
+            $.ajax({
+                type: "POST",
+                url: _ajax_login_settings.ajaxurl,
+                data: {
+                    action: 'load_template',
+                    referer: 'login_form',
+                    template: 'login-form',
+                    security: $('#ajax-login-register-login-dialog').attr('data-security')
+                },
+                success: function( msg ){
+                    $( "#ajax-login-register-login-target" ).fadeIn().html( msg ); // Give a smooth fade in effect
+                }
+            });
+        }
+    };
+
     /**
      * We hook into the form submission and submit it via ajax.
      * the action maps to our php function, which is added as
@@ -6,16 +27,15 @@ jQuery( document ).ready(function( $ ){
      */
     $( document ).on('submit', '.login_form', function( event ){
         event.preventDefault();
+        var $this = $(this);
         $.ajax({
-            data: "action=login_submit&" + $(this).serialize(),
+            data: "action=login_submit&" + $this.serialize(),
             type: "POST",
             url: _ajax_login_settings.ajaxurl,
             success: function( msg ){
-                if ( msg == 0 ){
-                    $('#ajax-login-register-login-dialog').dialog('close');
-                } else {
-                    zMAjaxLoginRegister.reload();
-                }
+
+                ajax_login_register_show_message( $this, msg );
+
             }
         });
     });
@@ -26,18 +46,24 @@ jQuery( document ).ready(function( $ ){
      */
     $( document ).on( 'click', '.fb-login', function( event ){
         event.preventDefault();
+        var $form_obj = $(this).parents('form');
 
         /**
          * Doc code from FB, shows fb pop-up box
          *
          * @url https://developers.facebook.com/docs/reference/javascript/FB.login/
          */
+         // Better to check via?
+         // FB.api('/me/permissions', function( response ){});
+
+         // Since WordPress requires the email we cannot continue if they
+         // do not provide their email address 
         FB.login( function( response ) {
             /**
              * If we get a successful authorization response we handle it
              * note the "scope" parameter.
              */
-            if ( response.authResponse ) {
+            if ( response.authResponse.grantedScopes == "public_profile,email,contact_email" ){
 
                 /**
                  * "me" refers to the current FB user, console.log( response )
@@ -45,13 +71,6 @@ jQuery( document ).ready(function( $ ){
                  */
                 FB.api('/me', function(response) {
                     var fb_response = response;
-
-                    /**
-                     * Yes, bad, very bad!
-                     */
-                    email = response.email;
-                    var user_login = email.split("@");
-                    user_login = user_login[0];
 
                     /**
                      * Make an Ajax request to the "facebook_login" function
@@ -63,17 +82,14 @@ jQuery( document ).ready(function( $ ){
                     $.ajax({
                         data: {
                             action: "facebook_login",
-                            username: user_login,
-                            fb_id: fb_response.id,
-                            email: fb_response.email,
+                            fb_response: fb_response,
                             security: $('#facebook_security').val()
                         },
                         global: false,
                         type: "POST",
                         url: _ajax_login_settings.ajaxurl,
                         success: function( msg ){
-                            $('.fb-login-container').append( msg.description );
-                            zMAjaxLoginRegister.reload();
+                            ajax_login_register_show_message( $form_obj, msg );
                         }
                     });
                 });
@@ -85,7 +101,8 @@ jQuery( document ).ready(function( $ ){
              * See the following for full list:
              * @url https://developers.facebook.com/docs/authentication/permissions/
              */
-            scope: 'email'
+            scope: 'email',
+            return_scopes: true
         });
     });
 
@@ -105,24 +122,14 @@ jQuery( document ).ready(function( $ ){
             $( document ).on('click', _ajax_login_settings.login_handle, function( event ){
 
                 event.preventDefault();
+                zMAjaxLoginDialog.open();
 
-                $('#ajax-login-register-login-dialog').dialog('open');
-
-                $.ajax({
-                    type: "POST",
-                    url: _ajax_login_settings.ajaxurl,
-                    data: {
-                        action: 'load_template',
-                        referer: 'login_form',
-                        template: 'login-form',
-                        security: $('#ajax-login-register-login-dialog').attr('data-security')
-                    },
-                    success: function( msg ){
-                        $( "#ajax-login-register-login-target" ).fadeIn().html( msg ); // Give a smooth fade in effect
-                    }
-                });
             });
         }
     }
 
+    $( document ).on('click', '.not-a-member-handle', function(){
+        $('#ajax-login-register-login-dialog').dialog('close');
+        zMAjaxLoginRegisterDialog.open();
+    });
 });
