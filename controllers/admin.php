@@ -1,14 +1,22 @@
 <?php
 
-Class Admin Extends AjaxLogin {
+Class ajax_login_register_Admin Extends AjaxLogin {
+
+    public $campaign_text_link;
+    public $campaign_banner_link;
 
     /**
      * WordPress hooks to be ran during init
      */
     public function __construct(){
+        $this->campaign_text_link = 'http://zanematthew.com/products/zm-ajax-login-register-pro/?utm_source=wordpress&utm_medium=alr_plugin&utm_content=textlink&utm_campaign=alr_pro_upsell_text';
+        $this->campaign_banner_link = 'http://zanematthew.com/products/zm-ajax-login-register-pro/?utm_source=wordpress&utm_medium=alr_plugin&utm_content=bannerlink&utm_campaign=alr_pro_upsell_banner';
+
         add_action( 'admin_init', array( &$this, 'admin_init' ) );
         add_action( 'admin_menu', array( &$this, 'admin_menu' ) );
-        add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_scripts') );
+        add_filter( 'plugin_action_links', array( &$this, 'plugin_action_links'), 10, 2 );
+        add_action( 'admin_notices', array( &$this, 'admin_notice' ) );
+        add_action( 'admin_enqueue_scripts', array( &$this, 'admin_enqueue_scripts' ) );
     }
 
     /**
@@ -84,13 +92,45 @@ Class Admin Extends AjaxLogin {
 
 
     /**
-     * Load admin CSS/JS only on our settings page
+     * Add our links to the plugin page, these show under the plugin in the table view.
+     *
+     * @param $links(array) The links coming in as an array
+     * @param $current_plugin_file(string) This is the "plugin basename", i.e., my-plugin/plugin.php
      */
-    public function enqueue_scripts(){
+    public function plugin_action_links( $links, $current_plugin_file ){
+        if ( $current_plugin_file == 'zm-ajax-login-register/plugin.php' ){
+            $links['ajax_login_register_settings'] = '<a href="' . admin_url( 'options-general.php?page=ajax-login-register-settings' ) . '">' . esc_attr__( 'General Settings', 'ajax_login_register' ) . '</a>';
+            $links['ajax_login_register_pro'] = sprintf('<a href="%2$s" title="%1$s" target="_blank">%1$s</a>', esc_attr__('Pro Version', 'ajax_login_register'), $this->campaign_text_link );
+        }
+
+        return $links;
+    }
+
+
+    /**
+     * Show an admin notice when the plugin is activated
+     * note the option 'ajax_login_register_plugin_notice_shown', is removed
+     * during the 'register_deactivation_hook', see 'ajax_login_register_deactivate()'
+     */
+    public function admin_notice(){
+        if ( ! get_option('ajax_login_register_plugin_notice_shown') && is_plugin_active( 'zm-ajax-login-register/plugin.php' ) ){
+            printf('<div class="updated"><p>%1$s %2$s</p></div>',
+                __('Thanks for installing zM AJAX Login & Register, be sure to check out the features in the', 'ajax_login_register'),
+                '<a href="' . $this->campaign_text_link . '" target="_blank">Pro version</a>.'
+            );
+            update_option('ajax_login_register_plugin_notice_shown', 'true');
+        }
+    }
+
+
+    /**
+     * Enqueue our Admin styles only on the ajax login register setting page
+     */
+    public function admin_enqueue_scripts(){
         $screen = get_current_screen();
         if ( $screen->id == 'settings_page_ajax-login-register-settings' ){
-            wp_enqueue_style( 'ajax-login-register-admin-css', plugin_dir_url( dirname( __FILE__ ) ) . 'assets/admin.css' );
+            wp_enqueue_style( 'ajax-login-register-admin-style', dirname( plugin_dir_url( __FILE__ ) ) . '/assets/admin.css' );
         }
     }
 }
-new Admin;
+new ajax_login_register_Admin;

@@ -2,9 +2,9 @@
 
 /**
  * Plugin Name: zM Ajax Login & Register
- * Plugin URI: --
+ * Plugin URI: http://zanematthew.com/products/zm-ajax-login-register/
  * Description: Creates a simple login and register modal with an optional shortcode.
- * Version: 1.0.7
+ * Version: 1.0.8
  * Author: Zane Matthew
  * Author URI: http://zanematthew.com/
  * License: GPL V2 or Later
@@ -80,13 +80,24 @@ function zm_ajax_login_register_localized_js(){
         'match_error' => AjaxLogin::status('passwords_do_not_match','description'),
         'is_user_logged_in' => is_user_logged_in() ? 1 : 0,
         'wp_logout_url' => wp_logout_url( site_url() ),
-        'logout_text' => __('Logout', 'ajax_login_register' )
+        'logout_text' => __('Logout', 'ajax_login_register' ),
+        'close_text' => __('Close', 'ajax_login_register' )
         );
 
     $localized = apply_filters( 'zm_ajax_login_register_localized_js', $defaults );
 
     return $localized;
 }
+
+
+/**
+ * When the plugin is deactivated remove the shown notice option
+ */
+function ajax_login_register_deactivate(){
+    delete_option( 'ajax_login_register_plugin_notice_shown' );
+}
+register_deactivation_hook( __FILE__, 'ajax_login_register_deactivate' );
+
 
 /**
  * Include our abstract which is a Class of shared Methods for our Classes.

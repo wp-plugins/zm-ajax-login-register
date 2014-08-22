@@ -211,7 +211,7 @@ abstract Class AjaxLogin {
     /**
      * Validation status responses
      */
-    public function status( $key=null, $value=null ){
+    static function status( $key=null, $value=null ){
 
         $status = array(
 
@@ -237,7 +237,7 @@ abstract Class AjaxLogin {
                 ),
 
             'incorrect_password' => array(
-                'description' => 'Invalid',
+                'description' => __( 'Invalid', 'ajax_login_register' ),
                 'cssClass' => 'error-container',
                 'code' => 'error'
                 ),
