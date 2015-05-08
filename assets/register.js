@@ -8,32 +8,14 @@ jQuery( document ).ready(function( $ ){
         $(this).closest('.ajax-login-register-container').dialog('close');
     });
 
-    window.zMAjaxLoginRegisterDialog = {
-        open: function(){
-            $('#ajax-login-register-dialog').dialog('open');
-
-            var data = {
-                action: 'load_template',
-                template: 'register-form',
-                referer: 'register_form',
-                security:  $('#ajax-login-register-dialog').attr('data-security')
-            };
-
-            $.ajax({
-                data: data,
-                type: "POST",
-                url: _ajax_login_settings.ajaxurl,
-                success: function( msg ){
-                    $( "#ajax-login-register-target" ).fadeIn().html( msg ); // Give a smooth fade in effect
-                }
-            });
-        }
-    };
 
     if ( _ajax_login_settings.register_handle.length ){
         $( document ).on('click', _ajax_login_settings.register_handle, function( event ){
             event.preventDefault();
-            zMAjaxLoginRegisterDialog.open();
+            zMAjaxLoginRegister.open_register();
+            if ( ! _ajax_login_settings.pre_load_forms.length ){
+                zMAjaxLoginRegister.load_register();
+            }
         });
     }
 
@@ -59,20 +41,23 @@ jQuery( document ).ready(function( $ ){
      * When the form is submitted process the AJAX request.
      */
     $( document ).on('submit', '.register_form', function( event ){
+
         event.preventDefault();
+        var $this = $( this );
 
         passwords_match = zMAjaxLoginRegister.confirm_password('.user_confirm_password');
 
         if ( passwords_match.code == 'error' ){
-            ajax_login_register_show_message( $(this), msg );
+            ajax_login_register_show_message( $this, msg );
         } else {
             $.ajax({
-                data: "action=register_submit&" + $( this ).serialize(),
+                global: false,
+                data: "action=setup_new_user&" + $this.serialize() + "&security=" + $this.data('alr_register_security'),
                 dataType: 'json',
                 type: "POST",
                 url: _ajax_login_settings.ajaxurl,
                 success: function( msg ) {
-                    ajax_login_register_show_message( $(this), msg );
+                    ajax_login_register_show_message( $this, msg );
                 }
             });
         }

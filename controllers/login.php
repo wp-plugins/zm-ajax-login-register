@@ -72,14 +72,34 @@ Class ajax_login_register_Login Extends AjaxLogin {
         // Currently wp_signon returns the same error code 'invalid_username' if
         // a username does not exists or is invalid
         if ( validate_username( $username ) ){
+
             if ( username_exists( $username ) ){
-                $creds = array(
-                    'user_login'    => $username,
-                    'user_password' => $password,
-                    'remember'      => $remember
-                    );
-                $user = wp_signon( $creds, false );
-                $status = is_wp_error( $user ) ? $this->status( $user->get_error_code() ) : $this->status('success_login');
+
+                // if option force check password
+                if ( get_option( 'ajax_login_register_force_check_password' ) ){
+
+                    $user = get_user_by( 'login', $username );
+                    if ( wp_check_password( $password, $user->data->user_pass, $user->ID ) ){
+
+                        $status = $this->status('success_login');
+                        wp_signon( array(
+                            'user_login'    => $username,
+                            'user_password' => $password,
+                            'remember'      => $remember
+                            ), false );
+                    }
+
+                } else {
+
+                    $creds = array(
+                        'user_login'    => $username,
+                        'user_password' => $password,
+                        'remember'      => $remember
+                        );
+                    $user = wp_signon( $creds, false );
+                    $status = is_wp_error( $user ) ? $this->status( $user->get_error_code() ) : $this->status('success_login');
+                }
+
             } else {
                 $status = $this->status('username_does_not_exists');
             }
@@ -98,7 +118,7 @@ Class ajax_login_register_Login Extends AjaxLogin {
     /**
      * Creates a new user in WordPress using their FB account info.
      *
-     * @uses register_submit();
+     * @uses setup_new_user();
      */
     public function facebook_login(){
 
@@ -110,38 +130,49 @@ Class ajax_login_register_Login Extends AjaxLogin {
             'user_login' => $_POST['fb_response']['id'],
             'first_name' => $_POST['fb_response']['first_name'],
             'last_name'  => $_POST['fb_response']['last_name'],
-            'user_email' => $_POST['fb_response']['email'],
+            'email'      => $_POST['fb_response']['email'],
             'user_url'   => $_POST['fb_response']['link'],
             );
 
         if ( empty( $user['username'] ) ){
 
-            $msg = $this->status('invalid_username');
+            $status = $this->status('invalid_username');
+            $user_id = false;
 
         } else {
 
             // If older version use this
             // $user_obj = get_user_by( 'email', $user['email'] );
-
             $user_obj = get_user_by( 'login', $user['user_login'] );
 
             if ( $user_obj == false ){
                 $register_obj = New ajax_login_register_Register;
-                $user_obj = $register_obj->create_facebook_user( $user );
+                $user_obj = $register_obj->setup_new_facebook_user( $user );
             }
 
-            // Log our FB user in
-            $password = get_usermeta( $user_obj->ID, '_random' );
-            $logged_in = $this->login_submit( $user_obj->user_login, $password, false );
+            if ( $user_obj ){
 
-            if ( $logged_in == true ){
-                $msg = $this->status('success_login');
+                $user_id = $user_obj->ID;
+
+                // Log our FB user in
+                $password = get_user_meta( $user_id, '_random', true );
+
+                $logged_in = $this->login_submit( $user_obj->user_login, $password, false );
+
+                if ( $logged_in == true ){
+                    $status = $this->status('success_login');
+                } else {
+                    $status = $this->status('invalid_username');
+                }
+
             } else {
-                die("\nSomething to do here");
+
+                $status = $this->status('invalid_username');
             }
         }
 
-        wp_send_json( $msg );
+        wp_send_json( $status );
+
     }
 
 
@@ -155,4 +186,7 @@ Class ajax_login_register_Login Extends AjaxLogin {
     }
 
 }
-new ajax_login_register_Login;
+function ajax_login_register_plugins_loaded_login(){
+    new ajax_login_register_Login;
+}
+add_action( 'plugins_loaded', 'ajax_login_register_plugins_loaded_login' );

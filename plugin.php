@@ -4,12 +4,14 @@
  * Plugin Name: zM Ajax Login & Register
  * Plugin URI: http://zanematthew.com/products/zm-ajax-login-register/
  * Description: Creates a simple login and register modal with an optional shortcode.
- * Version: 1.0.8
+ * Version: 1.0.9
  * Author: Zane Matthew
  * Author URI: http://zanematthew.com/
  * License: GPL V2 or Later
  */
 
+
+define( 'AJAX_LOGIN_REGISTER_VERSION', '1.0.9' );
 
 
 /**
@@ -48,9 +50,29 @@ add_action( 'wp_enqueue_scripts', 'zm_ajax_login_register_enqueue_scripts');
 
 
 function zm_ajax_login_register_localized_js(){
+
+
     $redirect_url = get_option('ajax_login_register_redirect');
-    $redirect_url = empty( $redirect_url ) ? network_site_url($_SERVER['REQUEST_URI']) : $redirect_url;
-    $redirect_url = apply_filters( 'zm_ajax_login_redirect', $redirect_url );
+
+    // Just use the current page
+    if ( empty( $redirect_url ) ){
+        global $wp;
+        $formatted_url = trailingslashit( add_query_arg( '', '', network_site_url( $wp->request ) ) );
+    }
+
+    // This is just a slug, and doesn't have http(s), so lets add it
+    elseif ( strpos( $redirect_url, 'http' ) === false ) {
+        $formatted_url = network_site_url( $redirect_url );
+    }
+
+    // Just use what ever they entered
+    else {
+
+        $formatted_url = esc_url( $redirect_url );
+    }
+
+    $redirect_url = apply_filters( 'zm_ajax_login_redirect', $formatted_url );
+
     $width = array(
         'default' => 265,
         'wide' => 440,
@@ -81,7 +103,8 @@ function zm_ajax_login_register_localized_js(){
         'is_user_logged_in' => is_user_logged_in() ? 1 : 0,
         'wp_logout_url' => wp_logout_url( site_url() ),
         'logout_text' => __('Logout', 'ajax_login_register' ),
-        'close_text' => __('Close', 'ajax_login_register' )
+        'close_text' => __('Close', 'ajax_login_register' ),
+        'pre_load_forms' => get_option( 'ajax_login_register_pre_load_forms' )
         );
 
     $localized = apply_filters( 'zm_ajax_login_register_localized_js', $defaults );
@@ -94,9 +117,26 @@ function zm_ajax_login_register_localized_js(){
  * When the plugin is deactivated remove the shown notice option
  */
 function ajax_login_register_deactivate(){
+
     delete_option( 'ajax_login_register_plugin_notice_shown' );
+    delete_option( 'ajax_login_register_version' );
+
 }
 register_deactivation_hook( __FILE__, 'ajax_login_register_deactivate' );
+
+
+function ajax_login_register_activate(){
+
+    $version = update_option( 'ajax_login_register_version', AJAX_LOGIN_REGISTER_VERSION );
+
+    if ( $version == '1.0.9' ){
+
+        // Remove the legacy option 'admins', which was used for Facebook admin IDs
+        delete_option( 'admins' );
+    }
+
+}
+register_activation_hook( __FILE__, 'ajax_login_register_activate' );
 
 
 /**

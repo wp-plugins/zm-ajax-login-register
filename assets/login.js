@@ -1,25 +1,5 @@
 jQuery( document ).ready(function( $ ){
 
-    window.zMAjaxLoginDialog = {
-        open: function(){
-            $('#ajax-login-register-login-dialog').dialog('open');
-
-            $.ajax({
-                type: "POST",
-                url: _ajax_login_settings.ajaxurl,
-                data: {
-                    action: 'load_template',
-                    referer: 'login_form',
-                    template: 'login-form',
-                    security: $('#ajax-login-register-login-dialog').attr('data-security')
-                },
-                success: function( msg ){
-                    $( "#ajax-login-register-login-target" ).fadeIn().html( msg ); // Give a smooth fade in effect
-                }
-            });
-        }
-    };
-
     /**
      * We hook into the form submission and submit it via ajax.
      * the action maps to our php function, which is added as
@@ -29,7 +9,8 @@ jQuery( document ).ready(function( $ ){
         event.preventDefault();
         var $this = $(this);
         $.ajax({
-            data: "action=login_submit&" + $this.serialize(),
+            global: false,
+            data: "action=login_submit&" + $this.serialize() + "&security=" + $this.data('alr_login_security'),
             type: "POST",
             url: _ajax_login_settings.ajaxurl,
             success: function( msg ){
@@ -45,8 +26,11 @@ jQuery( document ).ready(function( $ ){
      * Our element we are attaching the 'click' event to is loaded via ajax.
      */
     $( document ).on( 'click', '.fb-login', function( event ){
+
         event.preventDefault();
-        var $form_obj = $(this).parents('form');
+
+        var $form_obj = $( this ).parents('form'),
+            $this = $( this );
 
         /**
          * Doc code from FB, shows fb pop-up box
@@ -57,13 +41,18 @@ jQuery( document ).ready(function( $ ){
          // FB.api('/me/permissions', function( response ){});
 
          // Since WordPress requires the email we cannot continue if they
-         // do not provide their email address 
+         // do not provide their email address
         FB.login( function( response ) {
             /**
              * If we get a successful authorization response we handle it
              * note the "scope" parameter.
              */
-            if ( response.authResponse.grantedScopes == "public_profile,email,contact_email" ){
+            var requested_scopes = ['public_profile','email','contact_email'];
+            var response_scopes = $.map( response.authResponse.grantedScopes.split(","), $.trim );
+            var diff = $( requested_scopes ).not( response_scopes ).get();
+            var granted_access = diff.length;
+
+            if ( ! granted_access ){
 
                 /**
                  * "me" refers to the current FB user, console.log( response )
@@ -83,7 +72,7 @@ jQuery( document ).ready(function( $ ){
                         data: {
                             action: "facebook_login",
                             fb_response: fb_response,
-                            security: $('#facebook_security').val()
+                            security: $this.data('alr_facebook_security')
                         },
                         global: false,
                         type: "POST",
@@ -119,16 +108,22 @@ jQuery( document ).ready(function( $ ){
             $this.attr( 'href', _ajax_login_settings.wp_logout_url );
 
         } else {
+
             $( document ).on('click', _ajax_login_settings.login_handle, function( event ){
 
                 event.preventDefault();
-                zMAjaxLoginDialog.open();
+                zMAjaxLoginRegister.open_login();
+
+                if ( ! _ajax_login_settings.pre_load_forms.length ){
+                    zMAjaxLoginRegister.load_login();
+                }
 
             });
         }
     }
 
-    $( document ).on('click', '.not-a-member-handle', function(){
+    $( document ).on('click', '.not-a-member-handle', function( e ){
+        e.preventDefault();
         $('#ajax-login-register-login-dialog').dialog('close');
         zMAjaxLoginRegisterDialog.open();
     });

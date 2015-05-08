@@ -17,8 +17,7 @@
         <?php if ( ! empty( $value ) ) : ?>
             <meta property="<?php echo $key; ?>:<?php echo $value; ?>" content="<?php print $value; ?>" />
         <?php endif; ?>
-    <?php endforeach; ?>
-    <meta property="og:title" content="<?php wp_title( '|', true, 'right' ); ?>" />
+    <?php endforeach; ?>    
     <!-- End: Ajax Login Register Facebook meta tags -->
 <?php endif; ?>
 
@@ -28,7 +27,7 @@
     <script type="text/javascript">
         window.fbAsyncInit = function() {
             FB.init({
-                appId      : <?php print $app_id; ?>, // App ID
+                appId      : "<?php esc_attr_e( $app_id ); ?>", // App ID
                 cookie     : true,  // enable cookies to allow the server to access the session
                 xfbml      : true,  // parse XFBML
                 version    : 'v2.0' // use version 2.0
