@@ -132,6 +132,7 @@ Class ajax_login_register_Login Extends AjaxLogin {
             'last_name'  => $_POST['fb_response']['last_name'],
             'email'      => $_POST['fb_response']['email'],
             'user_url'   => $_POST['fb_response']['link'],
+            'fb_id'      => $_POST['fb_response']['id']
             );
 
         if ( empty( $user['username'] ) ){
@@ -154,19 +155,11 @@ Class ajax_login_register_Login Extends AjaxLogin {
 
                 $user_id = $user_obj->ID;
 
-                // Log our FB user in
-                $password = get_user_meta( $user_id, '_random', true );
+	            wp_set_auth_cookie( $user_id, true );
 
-                $logged_in = $this->login_submit( $user_obj->user_login, $password, false );
-
-                if ( $logged_in == true ){
-                    $status = $this->status('success_login');
-                } else {
-                    $status = $this->status('invalid_username');
-                }
+	            $status = $this->status('success_login');
 
             } else {
-
                 $status = $this->status('invalid_username');
             }
         }
