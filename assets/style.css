@@ -1,36 +1,57 @@
-body {
-    height: 100%;
-}
+.zm_alr_form_container *,
+.zm_alr_form_container *:before,
+.zm_alr_form_container *:after {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    }
 
-/*= Default Forms
--------------------------------------------------------------- */
-.ajax-login-default-form-container label {
+.zm_alr_label {
     display: block;
     font-weight: bold;
     margin-bottom: 5px;
     }
 
-.ajax-login-register-container .meta {
-    color: #A6A6A6;
-    font-size: 11px;
-    font-weight: 300;
-    font-family: helvetica;
-    line-height: 1.2em;
+.zm_alr_ul_container {
+    clear: both;
+    float: left;
+    width: 100%;
+    margin: 15px 0 0;
+    padding: 0;
+    list-style-type: none;
     }
 
-.ajax-login-default-form-container input[type="password"]:hover,
-.ajax-login-default-form-container input[type="text"]:hover {
+.zm_alr_ul_container li {
+    display: inline;
+    margin: 0 10px 0 0;
+    }
+
+.zm_alr_ul_container li:last-child {
+    margin: 0;
+    }
+
+.zm_alr_checkbox_field {
+    float: left;
+    margin: 5px 10px 0 0;
+    width: auto;
+    }
+
+.zm_alr_email_field:hover,
+.zm_alr_password_field:hover,
+.zm_alr_text_field:hover {
     border-color: #aaa;
     }
 
-.ajax-login-default-form-container input[type="password"]:focus,
-.ajax-login-default-form-container input[type="text"]:focus {
+.zm_alr_email_field:focus,
+.zm_alr_password_field:focus,
+.zm_alr_text_field:focus {
     border-color: #999;
     outline: none;
     }
 
-.ajax-login-default-form-container input[type="password"],
-.ajax-login-default-form-container input[type="text"] {
+.zm_alr_email_field,
+.zm_alr_password_field,
+.zm_alr_text_field {
     -webkit-transition-property: border-color;
     -moz-transition-property: border-color;
     -o-transition-property: border-color;
@@ -46,7 +67,7 @@ body {
     -o-transition-timing-function: linear;
     -ms-transition-timing-function: linear;
     transition-timing-function: linear;
-    width: 95%;
+    width: 100%;
     margin: 0 0 15px 0;
     background: #fff;
     border: 1px solid #ddd;
@@ -57,26 +78,30 @@ body {
     margin: 0;
     }
 
-.ajax-login-default-form-container input[type="submit"]:hover {
+.zm_alr_form_field_container {
+    margin: 0 0 15px 0;
+    }
+
+.zm_alr_form_container input[type="submit"]:hover {
     color: #008000;
     }
 
-.ajax-login-default-form-container input[type="submit"]:active {
+.zm_alr_form_container input[type="submit"]:active {
     -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1) inset;
     -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1) inset;
     border: 1px solid #CFCFCF;
     }
 
-.ajax-login-default-form-container input[type="submit"]:disabled:hover {
+.zm_alr_form_container input[type="submit"]:disabled:hover {
     cursor: default;
     }
 
-.ajax-login-default-form-container input[type="submit"]:disabled {
+.zm_alr_form_container input[type="submit"]:disabled {
     cursor: pointer;
     opacity: 0.5;
     }
 
-.ajax-login-default-form-container input[type="submit"] {
+.zm_alr_form_container input[type="submit"] {
     -webkit-transition-property: background-image;
     -webkit-transition-duration: 0.3s;
     -webkit-transition-timing-function: linear;
@@ -99,14 +124,34 @@ body {
     border: 1px solid #CFCFCF;
     }
 
-.ajax-login-default-form-container .button-container {
+.zm_alr_button_container {
     float: left;
     padding: 0;
     width: 100%;
+    margin: 20px 0 0;
     }
 
-.ajax-login-default-form-container .noon {
-    margin: 0 0 15px 0;
+
+.zm_alr_design_wide .zm_alr_form_field_container {
+    width: 50%;
+    float: left;
+    padding: 0 10px 0 0;
+    }
+
+.zm_alr_design_wide .zm_alr_form_field_container:last-child {
+    padding: 0;
+    }
+
+.zm_alr_design_wide .zm_alr_login_checkbox_container {
+    clear: both;
+    width: 100%;
+    margin: 0;
+    }
+
+
+.zm_alr_design_wide .zm_alr_form_field_container.zm_alr_submit_container {
+    margin: 20px 0 10px;
+    width: 100%;
     }
 
 .ajax-login-default-form-container input[type="button"].text {
@@ -142,11 +187,55 @@ body {
     padding: 8px 35px 8px 14px;
     }
 
-.login_form .button-container {
-    margin-top: 15px;
+
+
+/*= Default Form Styling
+-------------------------------------------------------------- */
+.form-wrapper {
+    float: left;
+    width: 100%;
+    margin: 0 0 20px 0;
     }
 
-.ajax-login-default-form-container a.fb-login:before {
+
+/*= Default Wide Styling
+-------------------------------------------------------------- */
+
+
+.ui-dialog .form-wrapper {
+    margin: 0;
+    }
+
+
+/*= Media Queries
+-------------------------------------------------------------- */
+@media screen and (max-width: 782px) {
+
+}
+
+@media screen and (max-width: 600px) {
+
+}
+
+
+.ajax-login-register-status-container {
+    clear: both;
+    float: left;
+    width: 100%;
+    font-size: 12px;
+    }
+
+.ui-dialog .ajax-login-default-form-container .error-container {
+    width: 205px;
+    }
+
+
+
+.zm_alr_social_facebook_login_container {
+    margin: 0 0 20px;
+    }
+
+.zm_alr_social_facebook_login_container a.fb-login-logo:before {
     background-image: url('images/fb-icon.png');
     content: ".";
     color: #425EAC;
@@ -160,7 +249,7 @@ body {
     text-align: center;
     }
 
-.ajax-login-default-form-container a.fb-login {
+.zm_alr_social_facebook_login_container a.fb-login-logo {
     font-family: 'lucida grande',tahoma,verdana,arial,sans-serif;
     text-decoration: none;
     background: #4c69ba;
@@ -177,77 +266,12 @@ body {
     clear: both;
     display: inline-block;
     line-height: 2.4em;
+    text-decoration: none;
     }
 
-.ajax-login-default-form-container a.fb-login:hover {
+.zm_alr_social_facebook_login_container a.fb-login-logo:hover {
     background: -webkit-gradient(linear, center top, center bottom, from(#5b7bd5), to(#4864b1));
     background: -webkit-linear-gradient(#5b7bd5, #4864b1);
     cursor: pointer;
+    color: #fff;
     }
-
-
-
-/*= Shortcode
--------------------------------------------------------------- */
-.hentry .ajax-login-default-form-container input[type="text"],
-.hentry .ajax-login-default-form-container input[type="password"] {
-    width: 300px;
-    }
-
-.hentry .fb-login-container {
-    margin: 0 0 20px;
-    }
-
-.hentry .wide .button-container input[type="submit"] {
-    float: left;
-    }
-
-.hentry .ajax-login-register-register-container .wide .fb-login-container {
-    margin: 43px 0 0;
-    }
-
-
-/*= Default Form Styling
--------------------------------------------------------------- */
-.form-wrapper {
-    float: left;
-    width: 100%;
-    margin: 0 0 20px 0;
-    }
-
-
-/*= Default Wide Styling
--------------------------------------------------------------- */
-.wide .fb-login-container {
-    width: 35%;
-    float: left;
-    margin: 22px 0 0;
-    }
-
-.wide .form-wrapper input[type="text"],
-.wide .form-wrapper input[type="password"] {
-    width: 95%;
-    }
-
-.wide .button-container input[type="submit"]{
-    float: right;
-    }
-
-.ui-dialog .form-wrapper {
-    margin: 0;
-    }
-
-
-/*= Media Queries
--------------------------------------------------------------- */
-@media screen and (max-width: 782px) {
-    .hentry .ajax-login-default-form-container input[type="text"],
-    .hentry .ajax-login-default-form-container input[type="password"] {
-        width: 100%;
-    }
-}
-
-@media screen and (max-width: 600px) {
-    .hentry .ajax-login-default-form-container input[type="text"],
-    .hentry .ajax-login-default-form-container input[type="password"] {}
-}

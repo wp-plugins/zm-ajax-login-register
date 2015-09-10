@@ -1,10 +1,10 @@
-=== zM Ajax Login & Register ===
+=== ZM Ajax Login & Register ===
 
 Contributors: ZaneMatthew, dvk
 Donate link: http://zanematthew.com/donate/
 Tags: admin, AJAX, login, manage, modal, password, plugin, redirect, register, username, Facebook
 Requires at least: 3.5
-Tested up to: 4.2.2
+Tested up to: 4.3
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -13,7 +13,7 @@ Allows you to create a custom login and registration page or login and registrat
 
 == Description ==
 
-With zM Ajax Login & Register, you can create a custom login and registration page. No need for any custom post types, just create a normal WordPress page, add your own custom logo, text, and use the following shortcode `[ajax_login]`, `[ajax_register]`.
+With ZM Ajax Login & Register, you can create a custom login and registration page. No need for any custom post types, just create a normal WordPress page, add your own custom logo, text, and use the following shortcode `[ajax_login]`, `[ajax_register]`.
 
 From the settings you can assign login and register modal boxes to menu items, and add a redirect URL. By assigning the login and register modals to menu items users will be able to click menu items, will display a single login or register form in a modal without any post content. Once the users login they can be redirected to a custom page, for example: "dashboard", or "welcome".
 
@@ -44,7 +44,7 @@ Interested in more features? View our [Pro Version](http://zanematthew.com/produ
 
 = Translations =
 
-zM AJAX Login & Register is available in the following languages. Thanks to the respective contributors:
+ZM AJAX Login & Register is available in the following languages. Thanks to the respective contributors:
 
 * Albanian via [shpberisha](http://www.twitter.com/shpberisha)
 * Brazilian Portuguese via [PageLab Pull Request](https://github.com/zanematthew/zm-ajax-login-register/pull/59)
@@ -160,6 +160,12 @@ Your seeing this message because your site is not open for registration. In orde
 
 
 == Changelog ==
+
+= 2.0.0 =
+
+ * Settings page is now tabbed based.
+ * Settings are now optimized.
+ * Enhancement: Clicking outside of a dialog now closes the dialog
 
 = 1.1.1 =
 
