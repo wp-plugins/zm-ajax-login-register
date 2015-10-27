@@ -208,17 +208,18 @@ Class ALRLogin {
         if ( $is_ajax ) check_ajax_referer('login_submit','security');
 
         $args = apply_filters( $this->prefix . '_form_params', array(
-            'user_login' => sanitize_user( $_POST['zm_alr_login_user_name'] ),
+            'user_login' => empty( $_POST['zm_alr_login_user_name'] ) ? null : sanitize_user( $_POST['zm_alr_login_user_name'] ),
             'password' => $_POST['zm_alr_login_password'],
-            'remember' => empty( $_POST['remember'] ) ? false : ture
+            'remember' => empty( $_POST['remember'] ) ? false : true
         ) );
 
-        $pre_status = apply_filters( $this->prefix . '_submit_pre_status_error', $_POST );
+        $status = null;
+        $pre_status_code = apply_filters( $this->prefix . '_submit_pre_status_error', $status );
 
         // If ANY status code is set we do not go forward
-        if ( isset( $pre_status['code'] ) ){
+        if ( isset( $pre_status_code ) ){
 
-            $status = $pre_status;
+            $status = $this->_zm_alr_helpers->status( $pre_status_code );
 
         }
 
@@ -281,8 +282,13 @@ Class ALRLogin {
 
         }
 
-        $redirect['redirect_url'] = $this->loginRedirect( $args['user_login'], $status['code'] );
-        $status = array_merge( $status, $redirect );
+        $status = array_merge( $status, array(
+            'redirect_url' => $this->_zm_alr_helpers->getRedirectUrl(
+                $args['user_login'],
+                $status['code'],
+                $this->prefix
+            )
+        ) );
 
         if ( $is_ajax ) {
             wp_send_json( $status );
@@ -314,21 +320,5 @@ Class ALRLogin {
             <?php do_action( $this->prefix . '_after_dialog' ); ?>
         </div>
     <?php }
-
-
-    public function loginRedirect( $user_login=null, $status=null ){
-
-        // Since this is handled via an AJAX request $wp->request is always empty
-        // @todo Submit to core
-        // global $wp;
-        // $current_url = trailingslashit( add_query_arg( '', '', site_url( $wp->request ) ) );
-        if ( $status == 'success_login' ){
-            $current_url = empty( $_SERVER['HTTP_REFERER'] ) ? site_url( $_SERVER['REQUEST_URI'] ) : $_SERVER['HTTP_REFERER'];
-            $redirect_url = apply_filters( $this->prefix . '_redirect_url', $current_url, $user_login, $status );
-        } else {
-            $redirect_url = null;
-        }
-        return $redirect_url;
-    }
 
 }

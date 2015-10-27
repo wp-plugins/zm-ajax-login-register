@@ -27,9 +27,9 @@ $document.ready(function( $ ){
     /**
      * Confirms that two input fields match
      */
-
-    function confirmPassword() {
-        $formButton = $( '.register_button', $form );
+    $document.on('keyup change', '.user_confirm_password', function(){
+        var $form = $(this).parents('form'),
+            $formButton = $( '.register_button', $form );
 
         if ( !$(this).val() ){
             $formButton
@@ -42,9 +42,7 @@ $document.ready(function( $ ){
                 .stop()
                 .animate({ opacity: 1 });
         }
-    }
-
-    $document.on('keyup change', '.user_confirm_password', confirmPassword);
+    });
 
 
     /**
@@ -54,29 +52,34 @@ $document.ready(function( $ ){
     $document.on('submit', '.register_form', function( event ){
 
         event.preventDefault();
-        var $this = $( this );
 
+        var $this = $( this ),
+            serialized_form = $this.serialize(),
+            form_fields = 'input[type="password"], input[type="text"], input[type="email"]',
+            google_recaptcha = zMAjaxLoginRegister.recaptcha_check_register();
+
+        $this.find( form_fields ).attr('disabled','disabled');
 
         if ( $('.user_confirm_password').length ){
             passwords_match = zMAjaxLoginRegister.confirm_password('.user_confirm_password');
 
-            if ( passwords_match.code == 'error' ){
+            if ( passwords_match.code == 'show_notice' ){
                 ajax_login_register_show_message( $this, msg );
+                $this.find( form_fields ).removeAttr('disabled');
                 zMAjaxLoginRegister.reload( msg.redirect_url );
                 return false;
             }
         }
 
-        var google_recaptcha = zMAjaxLoginRegister.recaptcha_check_register();
-
         $.ajax({
             global: false,
-            data: "action=setup_new_user&" + $this.serialize() + "&security=" + $this.data('zm_alr_register_security') + "&" + google_recaptcha,
+            data: "action=setup_new_user&" + serialized_form + "&security=" + $this.data('zm_alr_register_security') + "&" + google_recaptcha,
             dataType: 'json',
             type: "POST",
             url: _zm_alr_settings.ajaxurl,
             success: function( msg ) {
                 ajax_login_register_show_message( $this, msg );
+                $this.find( form_fields ).removeAttr('disabled');
                 zMAjaxLoginRegister.reload( msg.redirect_url );
             }
         });

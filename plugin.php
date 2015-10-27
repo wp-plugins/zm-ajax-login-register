@@ -4,7 +4,7 @@
  * Plugin Name: ZM Ajax Login & Register
  * Plugin URI: http://zanematthew.com/products/zm-ajax-login-register/
  * Description: Creates a simple login and register modal with an optional shortcode.
- * Version: 2.0.1
+ * Version: 2.0.2
  * Author: Zane Matthew
  * Author URI: http://zanematthew.com/
  * License: GPL V2 or Later
@@ -14,7 +14,7 @@ define( 'ZM_ALR_URL', plugin_dir_url( __FILE__ ) );
 define( 'ZM_ALR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ZM_ALR_NAMESPACE', 'zm_alr' );
 define( 'ZM_ALR_TEXT_DOMAIN', 'ajax_login_register' );
-define( 'ZM_ALR_VERSION', '2.0.1' );
+define( 'ZM_ALR_VERSION', '2.0.2' );
 define( 'ZM_ALR_PLUGIN_FILE', __FILE__ );
 
 define( 'ZM_ALR_PRODUCT_NAME', 'ZM AJAX Login Regiser' ); // Must match download title in EDD store!
@@ -146,8 +146,14 @@ function zm_ajax_login_register_enqueue_scripts(){
         'logged_in_text'  => __('You are already logged in', ZM_ALR_TEXT_DOMAIN ),
         'registered_text' => __( 'You are already registered', ZM_ALR_TEXT_DOMAIN ),
         'dialog_width'    => 'auto',
-        'dialog_height'   => 'auto'
-        ) ) );
+        'dialog_height'   => 'auto',
+        'dialog_position' => array(
+            'my' => 'center top',
+            'at' => 'center top+5%',
+            'of' => 'body'
+        )
+    ) ) );
+
 }
 add_action( 'wp_enqueue_scripts', 'zm_ajax_login_register_enqueue_scripts');
 

@@ -120,16 +120,19 @@ Class ALRRegister {
             $this->prefix . '_user_name' => array(
                 'title' => __( 'User Name', ZM_ALR_TEXT_DOMAIN ),
                 'type' => 'text',
+                'required' => true,
                 'extra' => 'autocorrect="none" autocapitalize="none"'
                 ),
             $this->prefix . '_email' => array(
                 'title' => __( 'Email', ZM_ALR_TEXT_DOMAIN ),
                 'type' => 'email',
+                'required' => true,
                 'extra' => 'autocorrect="none" autocapitalize="none"'
                 ),
             $this->prefix . '_password' => array(
                 'title' => __( 'Password', ZM_ALR_TEXT_DOMAIN ),
                 'type' => 'password',
+                'required' => true,
                 'extra' => 'autocorrect="none" autocapitalize="none"'
                 ),
             $this->prefix . '_confirm_password' => array(
@@ -208,21 +211,21 @@ Class ALRRegister {
 
         // Email verify needs to run "activate_user", and needs to disable createUser
         // Maybe activate user via pre status error?
-        $pre_status = apply_filters( $this->prefix . '_submit_pre_status_error', $status, $_POST );
+        $pre_status_code = apply_filters( $this->prefix . '_submit_pre_status_error', $status );
 
-        if ( isset( $pre_status['code'] ) ){
+        if ( isset( $pre_status_code ) ){
 
-            $status = $pre_status;
+            $status = $this->_zm_alr_helpers->status( $pre_status_code );
 
         }
 
-        elseif ( $valid['username']['code'] == 'error' ){
+        elseif ( $valid['username']['code'] == 'show_notice' ){
 
             $status = $this->_zm_alr_helpers->status('invalid_username');
 
         }
 
-        elseif ( $valid['email']['code'] == 'error' ){
+        elseif ( $valid['email']['code'] == 'show_notice' ){
 
             $status = $this->_zm_alr_helpers->status('invalid_username');
 
@@ -231,20 +234,26 @@ Class ALRRegister {
         else {
 
             $user_id = $this->_zm_alr_helpers->createUser( $user, $this->prefix );
-            $status = $this->_zm_alr_helpers->status('success_registration');
-            $status['id'] = $user_id;
+
+            $status = $this->_zm_alr_helpers->status( apply_filters(
+                $this->prefix . '_setup_new_user_status_filter',
+                'success_registration' ) );
 
             // Allow to void this!
             $did_signon = apply_filters( $this->prefix . '_do_signon', true );
             if ( $did_signon === true ){
-                $this->signOn( $user );
+                $this->signOn( $user, $status );
             }
 
         }
 
         $status = array_merge( $status, array(
-            'redirect_url' => $this->registerRedirect( $user['user_login'], $status['code'] ) )
-        );
+            'redirect_url' => $this->_zm_alr_helpers->getRedirectUrl(
+                $user['user_login'],
+                $status['code'],
+                $this->prefix
+            )
+        ) );
 
         if ( $is_ajax ) {
 
@@ -258,15 +267,29 @@ Class ALRRegister {
     }
 
 
-    public function signOn( $user=null ){
+    /**
+     * This is a wrapper for the default WordPress function wp_signon that
+     * performs certain functions after the signon.
+     *
+     * @param   array   $user     {
+     *      @type   string  $user_login     The user login
+     *      @type   string  $user_pass      The user password
+     * }
+     * @param   array   $status   {}
+     * @return  void
+     */
+    public function signOn( $user=null, $status=null ){
 
         $wp_signon = wp_signon( array(
             'user_login' => $user['user_login'],
             'user_password' => $user['user_pass'],
             'remember' => true ),
         false );
-        wp_new_user_notification( $user_id );
-        do_action( $this->prefix . '_after_signon', $user_id );
+
+        $user_obj = get_user_by( 'login', $user['user_login'] );
+
+        wp_new_user_notification( $user_obj->ID );
+        do_action( $this->prefix . '_after_signon', $user_obj->ID );
         $status = apply_filters( $this->prefix . '_signon_status', $status, $user );
 
     }
@@ -285,7 +308,9 @@ Class ALRRegister {
 
         $username = empty( $_POST['zm_alr_register_user_name'] ) ? esc_attr( $username ) : $_POST['zm_alr_register_user_name'];
 
-        if ( validate_username( $username ) ) {
+        if ( empty( $username ) ) {
+            $msg = $this->_zm_alr_helpers->status('invalid_username');
+        } elseif ( validate_username( $username ) ) {
             $user_id = username_exists( $username );
             if ( $user_id ){
                 $msg = $this->_zm_alr_helpers->status('username_exists');
@@ -374,15 +399,5 @@ Class ALRRegister {
             <?php do_action( $this->prefix . '_after_dialog' ); ?>
         </div>
     <?php }
-
-
-    public function registerRedirect( $user_login=null, $status=null ){
-
-        $current_url = empty( $_SERVER['HTTP_REFERER'] ) ? site_url( $_SERVER['REQUEST_URI'] ) : $_SERVER['HTTP_REFERER'];
-
-        $redirect_url = apply_filters( $this->prefix . '_redirect_url', $current_url, $user_login, $status );
-
-        return $redirect_url;
-    }
 
 }

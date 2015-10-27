@@ -21,28 +21,28 @@ Class ALRHelpers {
             'username_exists' => array(
                 'description' => __('Invalid username', ZM_ALR_TEXT_DOMAIN ),
                 'cssClass' => 'error-container',
-                'code' => 'error'
+                'code' => 'show_notice'
                 ),
             'invalid_username' => array(
                 'description' => __( 'Invalid username', ZM_ALR_TEXT_DOMAIN ),
                 'cssClass' => 'error-container',
-                'code' => 'error'
+                'code' => 'show_notice'
                 ),
             'username_does_not_exists' => array(
                 'description' => __( 'Invalid username', ZM_ALR_TEXT_DOMAIN ),
                 'cssClass' => 'error-container',
-                'code' => 'error'
+                'code' => 'show_notice'
                 ),
 
             'incorrect_password' => array(
                 'description' => __( 'Invalid', ZM_ALR_TEXT_DOMAIN ),
                 'cssClass' => 'error-container',
-                'code' => 'error'
+                'code' => 'show_notice'
                 ),
             'passwords_do_not_match' => array(
                 'description' => __('Passwords do not match.', ZM_ALR_TEXT_DOMAIN ),
                 'cssClass' =>'error-container',
-                'code' => 'error'
+                'code' => 'show_notice'
                 ),
 
             'email_valid' => array(
@@ -53,12 +53,12 @@ Class ALRHelpers {
             'email_invalid' => array(
                 'description' => __( 'Invalid Email', ZM_ALR_TEXT_DOMAIN ),
                 'cssClass' => 'error-container',
-                'code' => 'error'
+                'code' => 'show_notice'
                 ),
             'email_in_use' => array(
                 'description' => __( 'Invalid Email', ZM_ALR_TEXT_DOMAIN ),
                 'cssClass' => 'error-container',
-                'code' => 'error'
+                'code' => 'show_notice'
                 ),
 
             'success_login' => array(
@@ -68,7 +68,7 @@ Class ALRHelpers {
                 ),
             'success_registration' => array(
                 'description' => __( 'Success! One moment while we log you in...', ZM_ALR_TEXT_DOMAIN ),
-                'cssClass' => 'noon',
+                'cssClass' => 'noon success-container',
                 'code' => 'success_registration'
                 )
             );
@@ -197,6 +197,42 @@ Class ALRHelpers {
                 }
             }
         }
+    }
+
+
+    /**
+     * Determine the redirect URL for login, and registration.
+     *
+     * @since   2.0.2
+     *
+     * @param   (string)    $user_login     The user login
+     * @param   (string)    $status         The status code to check against.
+     * @param   (string)    $prefix         The prefix used for filters
+     */
+    public function getRedirectUrl( $user_login=null, $status=null, $prefix=null ){
+
+        $success = array(
+            'success_registration',
+            'success_login'
+            );
+
+        if ( in_array( $status, $success )){
+
+            $current_url = empty( $_SERVER['HTTP_REFERER'] ) ? site_url( $_SERVER['REQUEST_URI'] ) : $_SERVER['HTTP_REFERER'];
+
+            $redirect_url = apply_filters( $prefix . '_redirect_url',
+                $current_url,
+                $user_login,
+                $status
+            );
+
+        } else {
+
+            $redirect_url = null;
+
+        }
+
+        return $redirect_url;
     }
 
 }
